@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "author": "Dylan Cavanaugh",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "board-bmp180", "id": "bmp1", "top": 50, "left": -150, "attrs": {} },
+    { "type": "wokwi-mpu6050", "id": "imu1", "top": 50, "left": 150, "rotate": 270, "attrs": {} },
+    { "type": "wokwi-microsd-card", "id": "sd1", "top": 125, "left": -150, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "bmp1:VCC", "esp:3V3", "red", [ "h54.26", "v-25.36" ] ],
+    [ "bmp1:GND", "esp:GND.1", "black", [ "h44.66", "v90.03" ] ],
+    [ "bmp1:SDA", "esp:21", "green", [ "h15.86", "v-111.57", "h182.4", "v105.6", "h-14.44" ] ],
+    [ "bmp1:SCL", "esp:22", "blue", [ "h6.26", "v-111.57", "h201.6", "v86.4" ] ],
+    [ "imu1:VCC", "esp:3V3", "red", [ "h-12.68", "v-56.7", "h-182.4", "v38.4" ] ],
+    [ "imu1:GND", "esp:GND.1", "black", [ "h-3.08", "v-75.9", "h-201.6", "v172.8" ] ],
+    [ "imu1:SDA", "esp:21", "green", [ "v0.9", "h-65.52" ] ],
+    [ "imu1:SCL", "esp:22", "blue", [ "h-41.48", "v-18.3" ] ],
+    [ "sd1:VCC", "esp:3V3", "red", [ "h44.47", "v-143.83" ] ],
+    [ "sd1:GND", "esp:GND.1", "black", [ "h0" ] ],
+    [ "sd1:CS", "esp:5", "cyan", [ "h6.07", "v48.09", "h182.4", "v-124.8" ] ],
+    [ "sd1:SCK", "esp:18", "white", [ "h25.27", "v67.22", "h172.8", "v-124.8" ] ],
+    [ "sd1:DO", "esp:19", "yellow", [ "h34.87", "v76.94", "h172.8", "v-124.8" ] ],
+    [ "sd1:DI", "esp:23", "magenta", [ "h15.67", "v67.14", "h201.6", "v-211.2" ] ]
+  ],
+  "dependencies": {}
+}
