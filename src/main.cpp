@@ -4,7 +4,7 @@
 #include <SPI.h>              // Required by SD library
 #include <SD.h>               // Gives read/write capabilites for SD card
 #include <Adafruit_Sensor.h>  // Main sensor library
-#include <Adafruit_BMP280.h>  // Driver for Barometer
+#include <Adafruit_BMP3XX.h>  // Driver for Barometer
 //#include <Adafruit_BMP085.h>
 //#include <Adafruit_MPU6050.h> // Driver for Accelerometer
 #include <Adafruit_BNO08x.h> //Driver for IMU
@@ -13,7 +13,7 @@ const char* LOG_FILE_NAME = "/flight-log.txt";
 //const int SD_PIN = 5;
 const int SAMPLE_RATE = 100;  // How often data is logged (in milliseconds)
 
-Adafruit_BMP280 barometer;
+Adafruit_BMP3XX barometer;
 Adafruit_BNO08x IMU;
 sh2_SensorValue_t sensorValue;
 
@@ -21,17 +21,15 @@ void setup() {
   Serial.begin(115200); // Initialize ESP32
   Wire.begin();        // Initialize I2C
   SD.begin();
-  barometer.begin();
+  barometer.begin_I2C();
   IMU.begin_I2C();
 
   // Barometer configuration
-  barometer.setSampling(
-    Adafruit_BMP280::MODE_NORMAL,
-    Adafruit_BMP280::SAMPLING_X2,
-    Adafruit_BMP280::SAMPLING_X16,
-    Adafruit_BMP280::FILTER_X16,
-    Adafruit_BMP280::STANDBY_MS_500
-  );
+  barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
+  barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
+  barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+  barometer.setOutputDataRate(BMP3_ODR_50_HZ);
+
 
   // IMU configuration
   IMU.enableReport(SH2_ACCELEROMETER);
@@ -45,9 +43,9 @@ void setup() {
 
 void loop() {
   // Get the barometer's data readings
-  float altitude = barometer.readAltitude();
-  float temperature = barometer.readTemperature();
-  float pressure = barometer.readPressure();
+  float altitude = barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
+  float temperature = barometer.temperature;
+  float pressure = barometer.pressure;
 
   // Local variables for IMU data
   float accelX = 0, accelY = 0, accelZ = 0;
