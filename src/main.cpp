@@ -6,21 +6,23 @@
 #include <Adafruit_Sensor.h>  // Main sensor library
 #include <Adafruit_BMP280.h>  // Driver for Barometer
 //#include <Adafruit_BMP085.h>
-#include <Adafruit_MPU6050.h> // Driver for Accelerometer
+//#include <Adafruit_MPU6050.h> // Driver for Accelerometer
+#include <Adafruit_BNO08x.h> //Driver for IMU
 
 const char* LOG_FILE_NAME = "/flight-log.txt";
 //const int SD_PIN = 5;
 const int SAMPLE_RATE = 100;  // How often data is logged (in milliseconds)
 
 Adafruit_BMP280 barometer;
-Adafruit_MPU6050 accelerometer;
+Adafruit_BNO08x IMU;
+sh2_SensorValue_t sensorValue;
 
 void setup() {
   Serial.begin(115200); // Initialize ESP32
-  Wire.begin();         // Initialize I2C
+  Wire.begin();        // Initialize I2C
   SD.begin();
   barometer.begin();
-  accelerometer.begin();
+  IMU.begin_I2C();
 
   // Barometer configuration
   barometer.setSampling(
@@ -31,10 +33,9 @@ void setup() {
     Adafruit_BMP280::STANDBY_MS_500
   );
 
-  // Accelerometer configuration
-  accelerometer.setAccelerometerRange(MPU6050_RANGE_8_G);
-  accelerometer.setGyroRange(MPU6050_RANGE_500_DEG);
-  accelerometer.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  // IMU configuration
+  IMU.enableReport(SH2_ACCELEROMETER);
+  IMU.enableReport(SH2_GYROSCOPE_CALIBRATED);
 
   // Log file creation
   File logFile = SD.open(LOG_FILE_NAME, "w");
@@ -48,19 +49,28 @@ void loop() {
   float temperature = barometer.readTemperature();
   float pressure = barometer.readPressure();
 
-  // Get the accelerometer's data readings
-  sensors_event_t accelEvent;
-  sensors_event_t gyroEvent;
-  sensors_event_t tempEvent;
-  accelerometer.getEvent(&accelEvent, &gyroEvent, &tempEvent);
+  // Local variables for IMU data
+  float accelX = 0, accelY = 0, accelZ = 0;
+  float gyroX = 0, gyroY = 0, gyroZ = 0;
+  
+  //Get IMU readings
+  while(IMU.getSensorEvent(&sensorValue)) {
+    switch (sensorValue.sensorId) {
 
-  float accelX = accelEvent.acceleration.x;
-  float accelY = accelEvent.acceleration.y;
-  float accelZ = accelEvent.acceleration.z;
+      case SH2_ACCELEROMETER:
+        accelX = sensorValue.un.accelerometer.x;
+        accelY = sensorValue.un.accelerometer.y;
+        accelZ = sensorValue.un.accelerometer.z;
+        break;
 
-  float gyroX = gyroEvent.gyro.x;
-  float gyroY = gyroEvent.gyro.y;
-  float gyroZ = gyroEvent.gyro.z;
+      case SH2_GYROSCOPE_CALIBRATED:
+        gyroX = sensorValue.un.gyroscope.x;
+        gyroY = sensorValue.un.gyroscope.y;
+        gyroZ = sensorValue.un.gyroscope.z;
+        break;
+    }
+  }
+
 
   // Write the data into the flight log
   File logFile = SD.open(LOG_FILE_NAME, "a");
