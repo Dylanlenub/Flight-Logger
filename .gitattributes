@@ -1,0 +1,3 @@
+# Automatically detect text files and normalize their line endings
+* text=auto eol=lf
+*.bat text eol=crlf
