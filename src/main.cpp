@@ -1,4 +1,3 @@
-// LIBRARIES //
 #include <Arduino.h>          // Enables use of Arduino-specific functions
 #include <Wire.h>             // I2C Library
 #include <SPI.h>              // Required by SD library
@@ -16,9 +15,9 @@
 
 const char *ssid = "ESP32 WiFi";
 const char *password = "12345678";
+#include <Adafruit_BNO08x.h>  // Driver for IMU
 
 const char* LOG_FILE_NAME = "/flight-log.txt";
-//const int SD_PIN = 5;
 const int SAMPLE_RATE = 100;  // How often data is logged (in milliseconds)
 
 // Global sensor values (read in loop, served on request)
@@ -71,17 +70,16 @@ void handleClient(){
 
 void setup() {
   Serial.begin(115200); // Initialize ESP32
-  Wire.begin();        // Initialize I2C
+  Wire.begin();         // Initialize I2C
   SD.begin();
-  barometer.begin_I2C();
+  Barometer.begin_I2C();
   IMU.begin_I2C();
 
   // Barometer configuration
-  barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
-  barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
-  barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
-  barometer.setOutputDataRate(BMP3_ODR_50_HZ);
-
+  Barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
+  Barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
+  Barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+  Barometer.setOutputDataRate(BMP3_ODR_50_HZ);
 
   // IMU configuration
   IMU.enableReport(SH2_ACCELEROMETER);
@@ -126,7 +124,6 @@ void loop() {
         break;
     }
   }
-
 
   // Write the data into the flight log
   File logFile = SD.open(LOG_FILE_NAME, "a");
