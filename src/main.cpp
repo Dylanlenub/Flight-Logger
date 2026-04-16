@@ -101,9 +101,9 @@ void setup() {
 
 void loop() {
   // Get the barometer's data readings
-  float altitude = barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
-  float temperature = barometer.temperature;
-  float pressure = barometer.pressure;
+  altitude = barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
+  temperature = barometer.temperature;
+  pressure = barometer.pressure;
 
   // Local variables for IMU data
   //float accelX = 0, accelY = 0, accelZ = 0;

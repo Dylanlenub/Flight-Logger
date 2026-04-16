@@ -1,6 +1,6 @@
 #pragma once
 
-const char htmlPage[] PROGMEM = R"=====(
+const char htmlPage[] = R"=====(
 <!DOCTYPE html>
 <html>
 <head>
