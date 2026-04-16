@@ -1,35 +1,30 @@
-// LIBRARIES //
 #include <Arduino.h>          // Enables use of Arduino-specific functions
 #include <Wire.h>             // I2C Library
 #include <SPI.h>              // Required by SD library
 #include <SD.h>               // Gives read/write capabilites for SD card
 #include <Adafruit_Sensor.h>  // Main sensor library
 #include <Adafruit_BMP3XX.h>  // Driver for Barometer
-//#include <Adafruit_BMP085.h>
-//#include <Adafruit_MPU6050.h> // Driver for Accelerometer
-#include <Adafruit_BNO08x.h> //Driver for IMU
+#include <Adafruit_BNO08x.h>  // Driver for IMU
 
 const char* LOG_FILE_NAME = "/flight-log.txt";
-//const int SD_PIN = 5;
 const int SAMPLE_RATE = 100;  // How often data is logged (in milliseconds)
 
-Adafruit_BMP3XX barometer;
+Adafruit_BMP3XX Barometer;
 Adafruit_BNO08x IMU;
 sh2_SensorValue_t sensorValue;
 
 void setup() {
   Serial.begin(115200); // Initialize ESP32
-  Wire.begin();        // Initialize I2C
+  Wire.begin();         // Initialize I2C
   SD.begin();
-  barometer.begin_I2C();
+  Barometer.begin_I2C();
   IMU.begin_I2C();
 
   // Barometer configuration
-  barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
-  barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
-  barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
-  barometer.setOutputDataRate(BMP3_ODR_50_HZ);
-
+  Barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
+  Barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
+  Barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+  Barometer.setOutputDataRate(BMP3_ODR_50_HZ);
 
   // IMU configuration
   IMU.enableReport(SH2_ACCELEROMETER);
@@ -43,9 +38,9 @@ void setup() {
 
 void loop() {
   // Get the barometer's data readings
-  float altitude = barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
-  float temperature = barometer.temperature;
-  float pressure = barometer.pressure;
+  float altitude = Barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
+  float temperature = Barometer.temperature;
+  float pressure = Barometer.pressure;
 
   // Local variables for IMU data
   float accelX = 0, accelY = 0, accelZ = 0;
@@ -68,7 +63,6 @@ void loop() {
         break;
     }
   }
-
 
   // Write the data into the flight log
   File logFile = SD.open(LOG_FILE_NAME, "a");
