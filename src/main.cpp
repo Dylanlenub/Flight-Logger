@@ -72,14 +72,14 @@ void setup() {
   Serial.begin(115200); // Initialize ESP32
   Wire.begin();         // Initialize I2C
   SD.begin();
-  Barometer.begin_I2C();
+  barometer.begin_I2C();
   IMU.begin_I2C();
 
   // Barometer configuration
-  Barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
-  Barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
-  Barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
-  Barometer.setOutputDataRate(BMP3_ODR_50_HZ);
+  barometer.setTemperatureOversampling(BMP3_OVERSAMPLING_2X);
+  barometer.setPressureOversampling(BMP3_OVERSAMPLING_16X);
+  barometer.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+  barometer.setOutputDataRate(BMP3_ODR_50_HZ);
 
   // IMU configuration
   IMU.enableReport(SH2_ACCELEROMETER);
