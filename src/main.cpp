@@ -68,6 +68,35 @@ void handleClient(){
   client.stop();
 }
 
+// ─────────────────────────────────────────────
+//  Quaternion → Euler (degrees)
+//  Convention: ZYX (aerospace) — Yaw/Pitch/Roll
+// ─────────────────────────────────────────────
+void quaternionToEuler(float qr, float qi, float qj, float qk,
+                       float &outRoll, float &outPitch, float &outYaw) {
+  // Rotation vector component layout from BNO08X:
+  //   real=qw, i=qx, j=qy, k=qz
+  float qw = qr, qx = qi, qy = qj, qz = qk;
+
+  // Roll (X-axis rotation)
+  float sinr_cosp = 2.0f * (qw * qx + qy * qz);
+  float cosr_cosp = 1.0f - 2.0f * (qx * qx + qy * qy);
+  outRoll = atan2f(sinr_cosp, cosr_cosp) * RAD_TO_DEG;
+
+  // Pitch (Y-axis rotation) — clamped to avoid gimbal singularity
+  float sinp = 2.0f * (qw * qy - qz * qx);
+  if (fabsf(sinp) >= 1.0f)
+    outPitch = copysignf(90.0f, sinp);
+  else
+    outPitch = asinf(sinp) * RAD_TO_DEG;
+
+  // Yaw (Z-axis rotation) — 0..360
+  float siny_cosp = 2.0f * (qw * qz + qx * qy);
+  float cosy_cosp = 1.0f - 2.0f * (qy * qy + qz * qz);
+  outYaw = atan2f(siny_cosp, cosy_cosp) * RAD_TO_DEG;
+  if (outYaw < 0) outYaw += 360.0f;
+}
+
 void setup() {
   Serial.begin(115200); // Initialize ESP32
   Wire.begin();         // Initialize I2C
@@ -105,10 +134,10 @@ void loop() {
 
   // Local variables for IMU data
   //float accelX = 0, accelY = 0, accelZ = 0;
-  float gyroX = 0, gyroY = 0, gyroZ = 0;
+  //float gyroX = 0, gyroY = 0, gyroZ = 0;
   
   //Get IMU readings
-  while(IMU.getSensorEvent(&sensorValue)) {
+/*  while(IMU.getSensorEvent(&sensorValue)) {
     switch (sensorValue.sensorId) {
 
       case SH2_ACCELEROMETER:
@@ -124,6 +153,23 @@ void loop() {
         break;
     }
   }
+*/
+
+  while (IMU.getSensorEvent(&sensorValue)){
+    if (sensorValue.sensorId == SH2_ROTATION_VECTOR){
+      quaternionToEuler(
+        sensorValue.un.rotationVector.real,
+        sensorValue.un.rotationVector.i,
+        sensorValue.un.rotationVector.j,
+        sensorValue.un.rotationVector.k,
+        roll, pitch, yaw
+      );
+    } else if (sensorValue.sensorId == SH2_LINEAR_ACCELERATION) {
+      accelX = sensorValue.un.linearAcceleration.x;
+      accelY = sensorValue.un.linearAcceleration.y;
+      accelZ = sensorValue.un.linearAcceleration.z;
+    }
+  }
 
   // Write the data into the flight log
   File logFile = SD.open(LOG_FILE_NAME, "a");
@@ -137,9 +183,9 @@ void loop() {
     accelX,
     accelY,
     accelZ,
-    gyroX,
-    gyroY,
-    gyroZ
+    roll,
+    pitch,
+    yaw
   );
 
   logFile.close();
