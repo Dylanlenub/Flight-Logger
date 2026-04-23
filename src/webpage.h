@@ -17,9 +17,9 @@ function update() {
     document.getElementById("temp").innerText     = d.temp     + " C";
     document.getElementById("pressure").innerText = d.pressure + " hPa";
     document.getElementById("altitude").innerText = d.altitude + " m";
-    //document.getElementById("pitch").innerText  = d.pitch    + " deg";
-    //document.getElementById("roll").innerText   = d.roll     + " deg";
-    //document.getElementById("yaw").innerText    = d.yaw      + " deg";
+    document.getElementById("pitch").innerText  = d.pitch    + " deg";
+    document.getElementById("roll").innerText   = d.roll     + " deg";
+    document.getElementById("yaw").innerText    = d.yaw      + " deg";
     document.getElementById("accelX").innerText   = d.accelX   + " m/s2";
     document.getElementById("accelY").innerText   = d.accelY   + " m/s2";
     document.getElementById("accelZ").innerText   = d.accelZ   + " m/s2";
@@ -35,9 +35,9 @@ update();
   <tr><td>Temperature</td><td id="temp">--</td></tr>
   <tr><td>Pressure</td>   <td id="pressure">--</td></tr>
   <tr><td>Altitude</td>   <td id="altitude">--</td></tr>
-  <!--<tr><td>Pitch</td>  <td id="pitch">--</td></tr>-->
-  <!--<tr><td>Roll</td>   <td id="roll">--</td></tr>-->
-  <!--<tr><td>Yaw</td>    <td id="yaw">--</td></tr>-->
+  <tr><td>Pitch</td>  <td id="pitch">--</td></tr>
+  <tr><td>Roll</td>   <td id="roll">--</td></tr>
+  <tr><td>Yaw</td>    <td id="yaw">--</td></tr>
   <tr><td>Accel X</td>    <td id="accelX">--</td></tr>
   <tr><td>Accel Y</td>    <td id="accelY">--</td></tr>
   <tr><td>Accel Z</td>    <td id="accelZ">--</td></tr>

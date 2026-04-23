@@ -24,12 +24,34 @@ const int SAMPLE_RATE = 100;  // How often data is logged (in milliseconds)
 float altitude    = 0, temperature = 0, pressure = 0;
 float accelX = 0, accelY = 0, accelZ = 0;
 float pitch  = 0, roll   = 0, yaw    = 0;
+float altitudeBaseline = 0.0f; 
 
 
 Adafruit_BMP3XX barometer;
 Adafruit_BNO08x IMU;
 sh2_SensorValue_t sensorValue;
 WiFiServer server(80); //port for server
+
+//Calibrate Roll Pitch Yaw
+void calibrate() {
+  float sum = 0;
+  int   good = 0;
+  for (int i = 0; i < 20; i++) {
+    if (IMU.enableReport(SH2_ROTATION_VECTOR, 10000)) {
+      sum += barometer.readAltitude(1013.25);
+      good++;
+    }
+    delay(50);
+  }
+  if (good > 0) {
+    altitudeBaseline = sum / good;
+    Serial.print(F("[CAL] Baseline set to "));
+    Serial.print(altitudeBaseline, 2);
+    Serial.println(F(" m"));
+  } else {
+    Serial.println(F("[CAL] ERROR: No valid BMP388 readings during calibration!"));
+  }
+}
 
 void handleClient(){
   WiFiClient client = server.available();
@@ -43,9 +65,9 @@ void handleClient(){
     json += "\"temp\":"      + String(temperature, 1) + ",";
     json += "\"pressure\":"  + String(pressure / 100.0, 1) + ","; // Pa -> hPa
     json += "\"altitude\":"  + String(altitude, 1)    + ",";
-    //json += "\"pitch\":"     + String(pitch, 1)        + ",";
-    //json += "\"roll\":"      + String(roll, 1)         + ",";
-    //json += "\"yaw\":"       + String(yaw, 1)          + ",";
+    json += "\"pitch\":"     + String(pitch, 1)        + ",";
+    json += "\"roll\":"      + String(roll, 1)         + ",";
+    json += "\"yaw\":"       + String(yaw, 1)          + ",";
     json += "\"accelX\":"    + String(accelX, 2)       + ",";
     json += "\"accelY\":"    + String(accelY, 2)       + ",";
     json += "\"accelZ\":"    + String(accelZ, 2);
@@ -111,8 +133,8 @@ void setup() {
   barometer.setOutputDataRate(BMP3_ODR_50_HZ);
 
   // IMU configuration
-  IMU.enableReport(SH2_ACCELEROMETER);
-  IMU.enableReport(SH2_GYROSCOPE_CALIBRATED);
+  IMU.enableReport(SH2_LINEAR_ACCELERATION, 10000);
+  IMU.enableReport(SH2_ROTATION_VECTOR, 10000);
 
   // Log file creation
   File logFile = SD.open(LOG_FILE_NAME, "w");
@@ -124,11 +146,13 @@ void setup() {
   Serial.print("AP IP: ");
   Serial.println(WiFi.softAPIP());
   server.begin();
+
+  calibrate();
 }
 
 void loop() {
   // Get the barometer's data readings
-  altitude = barometer.readAltitude(1013.25); // Standard sea level pressure in hPa
+  altitude = barometer.readAltitude(1013.25) - altitudeBaseline; // Standard sea level pressure in hPa
   temperature = barometer.temperature;
   pressure = barometer.pressure;
 
