@@ -95,12 +95,19 @@ void handleClient(){
     client.println("Connection: close");
     client.println();
     client.print(json);
-  } else {
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: text/html");
-    client.println("Connection: close");
-    client.println();
-    client.print(htmlPage);
+    } else if (req.indexOf("GET /calibrate") != -1) {
+      calibrate();
+      client.println("HTTP/1.1 200 OK");
+      client.println("Connection: close");
+      client.println();
+      client.print("OK"); }
+    
+      else {
+        client.println("HTTP/1.1 200 OK");
+        client.println("Content-Type: text/html");
+        client.println("Connection: close");
+        client.println();
+        client.print(htmlPage);
   }
 
   delay(1);

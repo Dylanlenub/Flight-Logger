@@ -42,6 +42,20 @@ update();
   <tr><td>Accel Y</td>    <td id="accelY">--</td></tr>
   <tr><td>Accel Z</td>    <td id="accelZ">--</td></tr>
 </table>
+
+<br>
+<button onclick="doCalibrate()" style="padding:10px 24px;font-size:15px;background:#333;color:white;border:1px solid #555;border-radius:6px;cursor:pointer;">Calibrate</button>
+<span id="calStatus" style="margin-left:12px;color:#aaa;"></span>
+
+<script>
+function doCalibrate() {
+  document.getElementById("calStatus").innerText = "Calibrating...";
+  fetch("/calibrate").then(() => {
+    document.getElementById("calStatus").innerText = "Done!";
+  });
+}
+</script>
+
 </body>
 </html>
 )=====";
