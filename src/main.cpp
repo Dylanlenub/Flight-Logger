@@ -34,10 +34,27 @@ WiFiServer server(80); //port for server
 
 //Calibrate Roll Pitch Yaw
 void calibrate() {
+  //Wait until BNO08x reports good calibration status
+  sh2_SensorValue_t val;
+  while (true) {
+    if (IMU.getSensorEvent(&val)) {
+      if (val.status >= 2) break;  // 0=unreliable, 1=low, 2=medium, 3=high
+    }
+    delay(10);
+  }
+
+  Serial.println(F("[CAL] IMU ready, sampling altitude baseline..."));
+
+  //Barometer sampling before calibration
+  for (int i = 0; i < 5; i++) {
+    barometer.performReading();
+    delay(50);
+  }
+
   float sum = 0;
   int   good = 0;
   for (int i = 0; i < 20; i++) {
-    if (IMU.enableReport(SH2_ROTATION_VECTOR, 10000)) {
+    if (barometer.performReading()) {
       sum += barometer.readAltitude(1013.25);
       good++;
     }
